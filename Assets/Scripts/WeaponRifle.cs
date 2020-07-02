@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponRifle : MonoBehaviour
+public class WeaponRifle : Weapon
 {
-    [SerializeField] Transform mainCamera;
     [SerializeField] float range = 100f;
     [SerializeField] int damage = 30;
     [SerializeField] LayerMask damageLayerMask;
@@ -14,47 +13,63 @@ public class WeaponRifle : MonoBehaviour
     [SerializeField] float impactForce = 10f;
     [SerializeField] GameObject impactEffect;
 
-    // Start is called before the first frame update
-    void Start()
+
+    protected override void Update()
     {
-        
+        base.Update();
+
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void InternalUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
+        //Debug.Log("Internal update");
+    }
+
+
+    protected override void Shoot()
+    {
+        flashEffect.Play();
+
+        //Debug.DrawRay(mainCamera.position, mainCamera.forward * range, Color.red, 10f);
+
+        RaycastHit hit;
+        if (Physics.Raycast(mainCamera.position, mainCamera.forward, out hit, range, damageLayerMask))
         {
-            flashEffect.Play();
-            //TODO play sound
+            //TODO use Pool
+            Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
 
-
-            //Debug.DrawRay(mainCamera.position, mainCamera.forward * range, Color.red, 10f);
-
-            RaycastHit hit;
-            if (Physics.Raycast(mainCamera.position, mainCamera.forward, out hit, range, damageLayerMask))
+            Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
+            if (rb != null)
             {
-                //TODO use Pool
-                Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
-
-                Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.AddForce((hit.point - mainCamera.position).normalized * impactForce);
-                }
-
-                DestoyableObject destroyable = hit.collider.GetComponent<DestoyableObject>();
-                if (destroyable != null)
-                {
-                    destroyable.DoDamage(damage);
-                }
-
-                Bomb bomb = hit.collider.GetComponent<Bomb>();
-                if (bomb != null)
-                {
-                    bomb.DoDamage(damage);
-                }
+                rb.AddForce((hit.point - mainCamera.position).normalized * impactForce);
             }
+
+            Health health = hit.collider.GetComponent<Health>();
+            if (health != null)
+            {
+                health.DoDamage(damage);
+            }
+
+
+
+            //ITarget target = hit.collider.GetComponent<ITarget>();
+            //if (target != null)
+            //{
+            //    target.DoDamage(damage);
+            //}
+
+            //DestoyableObject destroyable = hit.collider.GetComponent<DestoyableObject>();
+            //if (destroyable != null)
+            //{
+            //    destroyable.DoDamage(damage);
+            //}
+
+            //Bomb bomb = hit.collider.GetComponent<Bomb>();
+            //if (bomb != null)
+            //{
+            //    bomb.DoDamage(damage);
+            //}
+
         }
     }
 }

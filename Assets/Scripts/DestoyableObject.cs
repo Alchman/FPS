@@ -5,16 +5,31 @@ using UnityEngine;
 public class DestoyableObject : MonoBehaviour
 {
     [SerializeField] GameObject destroyedVersion;
-    [SerializeField] int health = 100;
+    //[SerializeField] int health = 100;
 
-    public void DoDamage(int damage)
+    Health health;
+
+    private void Start()
     {
-        health -= damage;
+        health = GetComponent<Health>();
 
-        if (health <= 0)
-        {
-            // Destroy(gameObject);
-            Instantiate(destroyedVersion, transform.position, transform.rotation);
-        }
+        health.OnDeath += DestroyObject;
     }
+
+    private void DestroyObject()
+    {
+        Destroy(gameObject);
+        Instantiate(destroyedVersion, transform.position, transform.rotation);
+    }
+
+    //public void DoDamage(int damage)
+    //{
+    //    health -= damage;
+
+    //    if (health <= 0)
+    //    {
+    //        // Destroy(gameObject);
+    //        Instantiate(destroyedVersion, transform.position, transform.rotation);
+    //    }
+    //}
 }
